@@ -3,9 +3,23 @@
 const CLAVE = 'reservas-sesion7-v1';
 const porId = (id) => document.getElementById(id);
 const formulario = porId('form-reserva');
+const campoFecha = porId('fecha');
 const lista = porId('lista');
 let reservas = [];
 let confirmacion = '';
+
+function actualizarFechaMinima() {
+  const hoy = new Date();
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoy.getDate()).padStart(2, '0');
+  campoFecha.min = `${anio}-${mes}-${dia}`;
+  return campoFecha.min;
+}
+
+actualizarFechaMinima();
+campoFecha.addEventListener('focus', actualizarFechaMinima);
+window.addEventListener('focus', actualizarFechaMinima);
 
 try {
   const guardadas = JSON.parse(localStorage.getItem(CLAVE) || '[]');
@@ -58,6 +72,11 @@ formulario.addEventListener('submit', (evento) => {
   const error = porId('error');
   error.textContent = '';
 
+  if (nueva.fecha < actualizarFechaMinima()) {
+    error.textContent = 'La fecha no puede ser anterior a hoy.';
+    campoFecha.focus();
+    return;
+  }
   if (nueva.fin <= nueva.inicio) {
     error.textContent = 'La hora final debe ser posterior a la inicial.';
     porId('fin').focus();
